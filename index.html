@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呈尚策划 - 飞书店铺统计系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(1deg); }
+            66% { transform: translateY(5px) rotate(-1deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .company-name {
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #1d1d1f 0%, #424245 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #6e6e73;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 60px;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 28px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow:
+                0 32px 64px rgba(0, 0, 0, 0.08),
+                0 16px 32px rgba(0, 0, 0, 0.04),
+                0 8px 16px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 28px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            pointer-events: none;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.01);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow:
+                0 40px 80px rgba(0, 0, 0, 0.12),
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                0 10px 20px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .card-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 40px;
+            background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 20px 40px rgba(0, 122, 255, 0.25),
+                0 8px 16px rgba(0, 122, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow:
+                0 25px 50px rgba(0, 122, 255, 0.3),
+                0 12px 24px rgba(0, 122, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .card-icon svg {
+            width: 44px;
+            height: 44px;
+            fill: white;
+            transition: all 0.4s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .card:hover .card-icon svg {
+            transform: scale(1.05);
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            letter-spacing: -0.8px;
+        }
+
+        .card-description {
+            color: #6e6e73;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            font-weight: 400;
+            letter-spacing: -0.2px;
+        }
+
+        .card-button {
+            background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 24px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            text-decoration: none;
+            display: inline-block;
+            box-shadow:
+                0 8px 24px rgba(0, 122, 255, 0.25),
+                0 4px 12px rgba(0, 122, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.2px;
+        }
+
+        .card-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .card-button:hover::before {
+            left: 100%;
+        }
+
+        .card-button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #0056cc 0%, #4a47a3 100%);
+            box-shadow:
+                0 12px 36px rgba(0, 122, 255, 0.3),
+                0 6px 18px rgba(0, 122, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .card-button:active {
+            transform: translateY(0px);
+        }
+
+        .footer {
+            margin-top: 100px;
+            text-align: center;
+            color: #6e6e73;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+            letter-spacing: -0.1px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 30px 20px;
+            }
+
+            .company-name {
+                font-size: 2.8rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .header {
+                margin-bottom: 60px;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding: 0 20px;
+            }
+
+            .card {
+                padding: 50px 30px;
+            }
+
+            .card-icon {
+                width: 85px;
+                height: 85px;
+                margin-bottom: 35px;
+            }
+
+            .card-icon svg {
+                width: 38px;
+                height: 38px;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+
+            .card-description {
+                font-size: 1rem;
+                margin-bottom: 35px;
+            }
+
+            .card-button {
+                padding: 14px 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .company-name {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .header {
+                margin-bottom: 50px;
+            }
+
+            .container {
+                gap: 30px;
+                padding: 0 15px;
+            }
+
+            .card {
+                padding: 40px 25px;
+            }
+
+            .card-icon {
+                width: 75px;
+                height: 75px;
+                margin-bottom: 30px;
+            }
+
+            .card-icon svg {
+                width: 34px;
+                height: 34px;
+            }
+
+            .card-title {
+                font-size: 1.4rem;
+            }
+
+            .card-description {
+                font-size: 0.95rem;
+                margin-bottom: 30px;
+            }
+
+            .card-button {
+                padding: 12px 28px;
+                font-size: 0.95rem;
+            }
+
+            .footer {
+                margin-top: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="company-name">呈尚策划</h1>
+        <p class="subtitle">飞书店铺统计系统</p>
+    </div>
+
+    <div class="container">
+        <div class="card" onclick="openLink('https://ev42nm8mkac.feishu.cn/base/XA8gbtw5naT0I8sDczbcJc9vnFz?table=tblbHISoPBJieolM&view=vew5odGBL4')">
+            <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3V21H21V3H3ZM5 5H19V19H5V5Z" fill="currentColor"/>
+                    <path d="M7 7H9V17H7V7Z" fill="currentColor"/>
+                    <path d="M11 9H13V17H11V9Z" fill="currentColor"/>
+                    <path d="M15 11H17V17H15V11Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <h2 class="card-title">飞书运营数据统计系统</h2>
+            <p class="card-description">查看和分析店铺运营数据，包括销售统计、用户行为分析等关键指标</p>
+            <span class="card-button">进入系统</span>
+        </div>
+
+        <div class="card" onclick="openLink('https://ev42nm8mkac.feishu.cn/share/base/query/shrcnzV94ItAGQMTg3O6z0fWphe')">
+            <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2 class="card-title">查询店铺是否解约</h2>
+            <p class="card-description">快速查询店铺合作状态，了解解约情况和相关信息</p>
+            <span class="card-button">开始查询</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 呈尚策划. 保留所有权利.</p>
+    </div>
+
+    <script>
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+
+        // 添加键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const focusedElement = document.activeElement;
+                if (focusedElement.classList.contains('card')) {
+                    focusedElement.click();
+                }
+            }
+        });
+
+        // 为卡片添加焦点支持
+        document.querySelectorAll('.card').forEach(card => {
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+        });
+    </script>
+</body>
+</html>
